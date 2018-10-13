@@ -1,13 +1,16 @@
-var express = require('express');
-var bodyParser = require('body-parser');
+const express = require('express');
+const bodyParser = require('body-parser');
 
-// var items = require('../database-mongo');
+// const items = require('../database-mongo');
 
-var app = express();
+const app = express();
 
 app.use(express.static(`${__dirname}/../react-client/dist`));
 
-app.listen(1337, function () {
-  console.log('fizzbang server listening on port 1337...');
+app.get('/test', (req, res) => {
+  res.status(200).send();
 });
 
+app.listen(1337, () => {
+  console.log('fizzbang server listening on port 1337...');
+});
