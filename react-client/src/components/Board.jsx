@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import Console from './Console.jsx';
+import helpers from '../helpers/helpers';
 
 class Board extends React.Component {
   constructor(props) {
@@ -9,7 +10,7 @@ class Board extends React.Component {
     this.state = {
       boardLength: null,
       boardWidth: null,
-      cells: [],
+      cells: [[]],
       selected: null,
       msg: 'Please select a cell...',
       turn: 0,
@@ -22,39 +23,52 @@ class Board extends React.Component {
   }
 
   initCells() {
+    // TBD make this a matrix
     const cells = [];
     for (let i = 0; i < this.state.numRows; i += 1) {
+      let newRow = [];
       for (let j = 0; j < this.state.numCols; j += 1) {
-        const rand = Math.random();
-        const longitude = j - this.state.numCols / 2;
+        const rand = helpers.normalize(Math.random(), 1, 100);
+        const longitude = helpers.normalize(j - this.state.numCols / 2, this.state.numCols / 2, 100);
+        const latitude = helpers.normalize(i - this.state.numRows / 2, this.state.numRows / 2, 100);
         const newCell = {
           row: i,
           col: j,
           key: `${i},${j}`,
           population: 0,
           isLand: false,
+          isWater: false,
+          isArctic: false,
           rand,
           longitude,
+          latitude,
         }
-        cells.push(newCell);
+        newRow.push(newCell);
       }
+      cells.push(newRow);
     }
 
     // decorate cells
-    cells.forEach((cell, index) => {
-      const long = Math.abs(cell.longitude * cell.longitude / 100);
+    cells.forEach((row, index) => {
+      row.forEach((cell, index) => {
+        const long = Math.abs(cell.longitude);
+        const lat = Math.abs(cell.latitude);
 
-      let isLandFactor = cell.rand * long;
+        cell.isLand = long + cell.rand / 3 > 45;
+        cell.isArctic = helpers.normalize(long + lat / 10 + cell.rand / 3, 200, 100) < 20;
 
-      cell.isLand = isLandFactor > .5;
+        cell.population = Math.floor(cell.rand * 1000000);
 
-      cell.population = Math.floor(cell.rand * 255);
+        if (cell.isLand) {
+          cell.style = { fill: `rgba(${34},${139},${34},${1})` };
+        } else {
+          cell.style = { fill: `rgba(${30},${144},${255},1)` };
+        }
 
-      if (cell.isLand) {
-        cell.style = { fill: `rgba(34,139,34,${cell.rand + .4})` };
-      } else {
-        cell.style = { fill: `rgba(30,144,255,1)` };
-      }
+        if (cell.isArctic) {
+          cell.style = { fill: `rgba(${255},${255},${255},1)` };
+        }
+      })
     })
 
     this.setState({ cells: cells });
@@ -92,19 +106,21 @@ class Board extends React.Component {
       <div>
         <svg className='board'>
           {
-            this.state.cells.map((cell) => {
-              if (this.state.boardLength && this.state.boardHeight) {
-                return <rect
-                  className='cell'
-                  key={cell.key}
-                  x={(this.state.boardLength / this.state.numCols) * cell.col}
-                  y={(this.state.boardHeight / this.state.numRows) * cell.row}
-                  width={(this.state.boardLength / this.state.numCols)}
-                  height={Math.floor((this.state.boardHeight / this.state.numRows))}
-                  style={cell.style}
-                  onClick={() => this.select(cell)}
-                />
-              }
+            this.state.cells.map((row) => {
+              return row.map((cell) => {
+                if (this.state.boardLength && this.state.boardHeight) {
+                  return <rect
+                    className='cell'
+                    key={cell.key}
+                    x={(this.state.boardLength / this.state.numCols) * cell.col}
+                    y={(this.state.boardHeight / this.state.numRows) * cell.row}
+                    width={(this.state.boardLength / this.state.numCols)}
+                    height={Math.floor((this.state.boardHeight / this.state.numRows))}
+                    style={cell.style}
+                    onClick={() => this.select(cell)}
+                  />
+                }
+              })
             })
           }
         </svg>

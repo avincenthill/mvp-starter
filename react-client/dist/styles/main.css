@@ -17,13 +17,21 @@ body {
 
 .board {
   height: 50vh;
-  width: 99vw;
+  width: 95vw;
   /* background-color: white; */
   flex: 1;
   margin: 1vmin;
   border: white;
   border-style: solid;
   border-width: 1px;
+}
+
+.console {
+  width: 50vw;
+  word-wrap: wrap;
+  word-break: break-all;
+  flex: 1;
+  margin: auto;
 }
 
 .cell {

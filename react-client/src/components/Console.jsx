@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 class Console extends Component {
   render() {
     return (
-      <div>
+      <div className='console'>
         {this.props.msg}
       </div>
     );
