@@ -16,8 +16,8 @@ body {
 }
 
 .board {
-  height: 75vmin;
-  width: 120.75vmin;
+  height: 50vh;
+  width: 99vw;
   /* background-color: white; */
   flex: 1;
   margin: 1vmin;

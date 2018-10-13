@@ -6,18 +6,12 @@ import $ from 'jquery';
 class App extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      turn: 0,
-      currentPlayer: 1,
-      numRows: 25,
-      numCols: 40,
-    };
   }
 
   render() {
     return (
       <div>
-        <Board gameState={this.state}></Board>
+        <Board ></Board>
       </div>
 
     );

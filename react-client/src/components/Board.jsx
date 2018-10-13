@@ -6,29 +6,62 @@ class Board extends React.Component {
   constructor(props) {
     super(props);
 
+    this.state = {
+      boardLength: null,
+      boardWidth: null,
+      cells: [],
+      selected: null,
+      msg: 'Please select a cell...',
+      turn: 0,
+      currentPlayer: 1,
+      numRows: 40,
+      numCols: 100,
+    };
+
+    this.select.bind(this);
+  }
+
+  initCells() {
     const cells = [];
-    for (let i = 0; i < this.props.gameState.numRows; i += 1) {
-      for (let j = 0; j < this.props.gameState.numCols; j += 1) {
+    for (let i = 0; i < this.state.numRows; i += 1) {
+      for (let j = 0; j < this.state.numCols; j += 1) {
+        const rand = Math.random();
+        const longitude = j - this.state.numCols / 2;
         const newCell = {
           row: i,
           col: j,
           key: `${i},${j}`,
+          population: 0,
+          isLand: false,
+          rand,
+          longitude,
         }
         cells.push(newCell);
       }
     }
 
-    this.state = {
-      boardLength: null,
-      boardWidth: null,
-      cells: cells,
-      selected: null,
-      msg: 'Welcome to Fizzbang!',
-    };
-    this.select.bind(this);
+    // decorate cells
+    cells.forEach((cell, index) => {
+      const long = Math.abs(cell.longitude * cell.longitude / 100);
+
+      let isLandFactor = cell.rand * long;
+
+      cell.isLand = isLandFactor > .5;
+
+      cell.population = Math.floor(cell.rand * 255);
+
+      if (cell.isLand) {
+        cell.style = { fill: `rgba(34,139,34,${cell.rand + .4})` };
+      } else {
+        cell.style = { fill: `rgba(30,144,255,1)` };
+      }
+    })
+
+    this.setState({ cells: cells });
   }
 
   componentDidMount() {
+    this.initCells();
     this.updateBoardDims();
   }
 
@@ -50,39 +83,32 @@ class Board extends React.Component {
   select(cell) {
     this.setState({
       selected: cell,
-      msg: `You selected cell ${cell.key}`
+      msg: `You selected ${JSON.stringify(cell)}`
     });
   }
 
   render() {
     return (
       <div>
-        <Console msg={this.state.msg}></Console>
         <svg className='board'>
-          {this.state.cells.map((cell) => {
-            let style;
-            if (cell === this.state.lastHoveredCell) {
-              style = { fill: `white` };
-            } else if (cell === this.state.selected) {
-              style = { fill: `red` };
-            } else {
-              style = { fill: `black`, stroke: 'white', strokeWidth: .25 };
-            }
-
-            if (this.state.boardLength && this.state.boardHeight) {
-              return <rect
-                className='cell'
-                key={cell.key}
-                x={(this.state.boardLength / this.props.gameState.numCols) * cell.col}
-                y={(this.state.boardHeight / this.props.gameState.numRows) * cell.row}
-                width={(this.state.boardLength / this.props.gameState.numCols)}
-                height={Math.floor((this.state.boardHeight / this.props.gameState.numRows))}
-                style={style}
-                onClick={() => this.select(cell)}
-              />
-            }
-          })}
+          {
+            this.state.cells.map((cell) => {
+              if (this.state.boardLength && this.state.boardHeight) {
+                return <rect
+                  className='cell'
+                  key={cell.key}
+                  x={(this.state.boardLength / this.state.numCols) * cell.col}
+                  y={(this.state.boardHeight / this.state.numRows) * cell.row}
+                  width={(this.state.boardLength / this.state.numCols)}
+                  height={Math.floor((this.state.boardHeight / this.state.numRows))}
+                  style={cell.style}
+                  onClick={() => this.select(cell)}
+                />
+              }
+            })
+          }
         </svg>
+        <Console msg={this.state.msg}></Console>
       </div>
     );
   }
