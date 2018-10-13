@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import Console from './Console.jsx';
 
 class Board extends React.Component {
   constructor(props) {
@@ -11,8 +12,7 @@ class Board extends React.Component {
         const newCell = {
           row: i,
           col: j,
-          selected: false,
-          hovered: false,
+          key: `${i},${j}`,
         }
         cells.push(newCell);
       }
@@ -22,11 +22,10 @@ class Board extends React.Component {
       boardLength: null,
       boardWidth: null,
       cells: cells,
-      lastHoveredCell: null,
+      selected: null,
+      msg: 'Welcome to Fizzbang!',
     };
-    this.hover.bind(this);
-    this.unhover.bind(this);
-
+    this.select.bind(this);
   }
 
   componentDidMount() {
@@ -48,24 +47,24 @@ class Board extends React.Component {
     // setInterval(getDimsAndUpdate, 100);
   }
 
-  hover(cell) {
-    cell.hovered = true;
-    this.setState({ lastHoveredCell: cell });
-  }
-
-  unhover(cell) {
-    cell.hovered = false;
+  select(cell) {
+    this.setState({
+      selected: cell,
+      msg: `You selected cell ${cell.key}`
+    });
   }
 
   render() {
     return (
       <div>
-        <div>Welcome to Fizzbang!</div>
+        <Console msg={this.state.msg}></Console>
         <svg className='board'>
           {this.state.cells.map((cell) => {
             let style;
-            if (cell.hovered) {
+            if (cell === this.state.lastHoveredCell) {
               style = { fill: `white` };
+            } else if (cell === this.state.selected) {
+              style = { fill: `red` };
             } else {
               style = { fill: `black`, stroke: 'white', strokeWidth: .25 };
             }
@@ -73,14 +72,13 @@ class Board extends React.Component {
             if (this.state.boardLength && this.state.boardHeight) {
               return <rect
                 className='cell'
-                key={[cell.row, cell.col]}
+                key={cell.key}
                 x={(this.state.boardLength / this.props.gameState.numCols) * cell.col}
                 y={(this.state.boardHeight / this.props.gameState.numRows) * cell.row}
                 width={(this.state.boardLength / this.props.gameState.numCols)}
                 height={Math.floor((this.state.boardHeight / this.props.gameState.numRows))}
                 style={style}
-                onMouseEnter={() => this.hover(cell)}
-                onMouseLeave={() => this.unhover(cell)}
+                onClick={() => this.select(cell)}
               />
             }
           })}
