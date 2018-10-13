@@ -8,7 +8,13 @@ class Board extends React.Component {
     const cells = [];
     for (let i = 0; i < this.props.gameState.numRows; i += 1) {
       for (let j = 0; j < this.props.gameState.numCols; j += 1) {
-        cells.push([i, j]);
+        const newCell = {
+          row: i,
+          col: j,
+          selected: false,
+          hovered: false,
+        }
+        cells.push(newCell);
       }
     }
 
@@ -16,8 +22,11 @@ class Board extends React.Component {
       boardLength: null,
       boardWidth: null,
       cells: cells,
+      lastHoveredCell: null,
     };
-    this.handleClick.bind(this);
+    this.hover.bind(this);
+    this.unhover.bind(this);
+
   }
 
   componentDidMount() {
@@ -39,8 +48,13 @@ class Board extends React.Component {
     // setInterval(getDimsAndUpdate, 100);
   }
 
-  handleClick() {
-    alert(this)
+  hover(cell) {
+    cell.hovered = true;
+    this.setState({ lastHoveredCell: cell });
+  }
+
+  unhover(cell) {
+    cell.hovered = false;
   }
 
   render() {
@@ -49,16 +63,24 @@ class Board extends React.Component {
         <div>Welcome to Fizzbang!</div>
         <svg className='board'>
           {this.state.cells.map((cell) => {
-            // console.log(this.state.boardLength, this.state.boardHeight, this.props.gameState.numRows, this.props.gameState.numCols)
+            let style;
+            if (cell.hovered) {
+              style = { fill: `white` };
+            } else {
+              style = { fill: `black`, stroke: 'white', strokeWidth: .25 };
+            }
+
             if (this.state.boardLength && this.state.boardHeight) {
               return <rect
-                key={cell}
-                x={(this.state.boardLength / this.props.gameState.numCols) * cell[1]}
-                y={(this.state.boardHeight / this.props.gameState.numRows) * cell[0]}
+                className='cell'
+                key={[cell.row, cell.col]}
+                x={(this.state.boardLength / this.props.gameState.numCols) * cell.col}
+                y={(this.state.boardHeight / this.props.gameState.numRows) * cell.row}
                 width={(this.state.boardLength / this.props.gameState.numCols)}
                 height={Math.floor((this.state.boardHeight / this.props.gameState.numRows))}
-                style={{ fill: 'white', stroke: 'black', strokeWidth: '.5px' }}
-                onClick={this.handleClick.bind(cell)}
+                style={style}
+                onMouseEnter={() => this.hover(cell)}
+                onMouseLeave={() => this.unhover(cell)}
               />
             }
           })}

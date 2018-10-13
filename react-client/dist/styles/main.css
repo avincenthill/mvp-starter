@@ -12,12 +12,19 @@ body {
   height: 100vmin;
   width: 100vmin;
   margin: auto;
+
 }
 
 .board {
-  height: 50vmin;
-  width: 80.9vmin;
-  background-color: white;
+  height: 75vmin;
+  width: 120.75vmin;
+  /* background-color: white; */
   flex: 1;
   margin: 1vmin;
+  border: white;
+  border-style: solid;
+  border-width: 1px;
+}
+
+.cell {
 }

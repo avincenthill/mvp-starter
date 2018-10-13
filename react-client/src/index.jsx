@@ -9,8 +9,8 @@ class App extends React.Component {
     this.state = {
       turn: 0,
       currentPlayer: 1,
-      numRows: 10,
-      numCols: 16,
+      numRows: 25,
+      numCols: 40,
     };
   }
 
