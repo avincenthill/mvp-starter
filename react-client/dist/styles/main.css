@@ -1,0 +1,20 @@
+body {
+  background-color: black;
+  color: white;
+}
+
+#app {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vmin;
+  width: 100vmin;
+  margin: auto;
+}
+
+.board {
+  height: 50vmin;
+  width: 80.9vmin;
+  background-color: white;
+  flex: 1;
+}
