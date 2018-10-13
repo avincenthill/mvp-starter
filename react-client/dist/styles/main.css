@@ -1,6 +1,8 @@
 body {
   background-color: black;
   color: white;
+  text-align: center;
+  font-size: 3vmin;
 }
 
 #app {
@@ -17,4 +19,5 @@ body {
   width: 80.9vmin;
   background-color: white;
   flex: 1;
+  margin: 1vmin;
 }
