@@ -12,7 +12,8 @@ class Board extends React.Component {
       boardWidth: null,
       cells: [[]],
       selected: null,
-      msg: 'Please select a cell...',
+      console2: 'Welcome to Fizzbang!',
+      console1: 'Please select a cell...',
       turn: 0,
       currentPlayer: 1,
       numRows: 40,
@@ -53,21 +54,38 @@ class Board extends React.Component {
       row.forEach((cell, index) => {
         const long = Math.abs(cell.longitude);
         const lat = Math.abs(cell.latitude);
+        cell.isLand = helpers.normalize(long + lat / 5 + cell.rand / 3, 133, 100) > 50;
 
-        cell.isLand = long + cell.rand / 3 > 45;
-        cell.isArctic = helpers.normalize(long + lat / 10 + cell.rand / 3, 200, 100) < 20;
 
-        cell.population = Math.floor(cell.rand * 1000000);
+        if (cell.rand > 80 && cell.isLand) {
+          cell.population = 50000
+        } if (cell.rand > 90 && cell.isLand) {
+          cell.population = 100000
+        } if (cell.rand > 95 && cell.isLand && long > 50) {
+          cell.population = 250000
+        } if (cell.rand > 96 && cell.isLand && long > 50) {
+          cell.population = 500000
+        } if (cell.rand > 98 && cell.isLand && long > 50) {
+          cell.population = 5000000
+        } else if (cell.isLand && cell.population === 0) {
+          cell.population = Math.floor(1 + cell.rand * 1000);
+        }
+
 
         if (cell.isLand) {
-          cell.style = { fill: `rgba(${34},${139},${34},${1})` };
+          cell.style = { fill: `rgba(${34},${139},${34},${50000 / cell.population})` };
         } else {
+          cell.isWater = true;
           cell.style = { fill: `rgba(${30},${144},${255},1)` };
         }
 
+        cell.isArctic = helpers.normalize(long + lat / 10 + cell.rand / 3, 200, 100) < 20;
         if (cell.isArctic) {
           cell.style = { fill: `rgba(${255},${255},${255},1)` };
         }
+
+
+
       })
     })
 
@@ -97,13 +115,14 @@ class Board extends React.Component {
   select(cell) {
     this.setState({
       selected: cell,
-      msg: `You selected ${JSON.stringify(cell)}`
+      console1: `You selected ${JSON.stringify(cell)}`
     });
   }
 
   render() {
     return (
       <div>
+        <Console console={this.state.console2}></Console>
         <svg className='board'>
           {
             this.state.cells.map((row) => {
@@ -124,7 +143,7 @@ class Board extends React.Component {
             })
           }
         </svg>
-        <Console msg={this.state.msg}></Console>
+        <Console console={this.state.console1}></Console>
       </div>
     );
   }

@@ -3,6 +3,7 @@ body {
   color: white;
   text-align: center;
   font-size: 3vmin;
+  font-family: 'Inconsolata', monospace;
 }
 
 #app {

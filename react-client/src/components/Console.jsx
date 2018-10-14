@@ -5,7 +5,7 @@ class Console extends Component {
   render() {
     return (
       <div className='console'>
-        {this.props.msg}
+        {this.props.console}
       </div>
     );
   }
