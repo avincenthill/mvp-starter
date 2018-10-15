@@ -18,8 +18,8 @@ body {
 
 .board {
   height: 50vh;
-  width: 95vw;
-  /* background-color: white; */
+  width: 90vw;
+  background-color: black;
   flex: 1;
   margin: 1vmin;
   border: white;
@@ -28,11 +28,12 @@ body {
 }
 
 .console {
-  width: 50vw;
+  width: 95vw;
   word-wrap: wrap;
   word-break: break-all;
   flex: 1;
   margin: auto;
+  white-space: pre-wrap;
 }
 
 .cell {
