@@ -13,7 +13,7 @@ class Board extends React.Component {
       boardWidth: null,
       cells: [[]],
       selected: null,
-      console1: 'Click anywhere to begin thermonuclear war...',
+      console1: 'Win by inflicting 75% casualties on the enemy. Click anywhere to begin thermonuclear war...',
       console2: '',
       console3: '',
       turn: 0,
@@ -28,6 +28,7 @@ class Board extends React.Component {
       isOver: false,
       player1CasualtyPercentage: 0,
       player2CasualtyPercentage: 0,
+      winPercentage: 75,
     };
     this.select.bind(this);
   }
@@ -184,18 +185,18 @@ class Board extends React.Component {
   }
 
   select(cell) {
-    if (this.state.turn) {
+    this.next();
+    if (this.state.turn && !this.state.isOver) {
       this.nuke(cell, 6);
       this.setState({
         selected: cell,
         // console3: `\n ${JSON.stringify(cell)}`
       });
     }
-    this.next();
   }
 
   nuke(cell, spread) {
-    if (spread > 0) {
+    if (spread > 0 && !this.isOver) {
       const newPop = Math.floor(cell.population * .1);
       this.decorate(cell, {
         population: newPop,
@@ -286,6 +287,7 @@ class Board extends React.Component {
     const thisTurn = lastTurn + 1;
     let currentPlayer;
     let currentPlayerName;
+    let isOver = false;
     if (thisTurn % 2 === 0) {
       currentPlayerName = 'Capitalistica';
       currentPlayer = 1;
@@ -293,10 +295,12 @@ class Board extends React.Component {
       currentPlayerName = 'Communistico';
       currentPlayer = 2;
     }
-    if (this.state.player1CasualtyPercentage > 75) {
-      readout = `Communistico wins by inflicting 75% on the Capitalistica`;
-    } else if (this.state.player2CasualtyPercentage > 75) {
-      readout = `Communistico wins by inflicting 75% on the Capitalistica`;
+    if (this.state.player1CasualtyPercentage > this.state.winPercentage) {
+      readout = `Communistico wins by inflicting ${this.state.winPercentage}% casualties on Capitalistica`;
+      isOver = true;
+    } else if (this.state.player2CasualtyPercentage > this.state.winPercentage) {
+      readout = `Capitalistica wins by inflicting ${this.state.winPercentage}% casualties on Communistico`;
+      isOver = true;
     } else {
       this.gameLoop();
       readout = `Turn ${thisTurn}. It is ${currentPlayerName}'s turn to launch ${1} ICBM(s)...`;
@@ -307,6 +311,7 @@ class Board extends React.Component {
       console1: readout,
       currentPlayer,
       currentPlayerName,
+      isOver,
     });
 
     this.styleCells(this.state.cells);
