@@ -26,6 +26,8 @@ class Board extends React.Component {
       player1StartingPop: 1,
       player2StartingPop: 1,
       isOver: false,
+      player1CasualtyPercentage: 0,
+      player2CasualtyPercentage: 0,
     };
     this.select.bind(this);
   }
@@ -183,7 +185,7 @@ class Board extends React.Component {
 
   select(cell) {
     if (this.state.turn) {
-      this.nuke(cell, 4);
+      this.nuke(cell, 6);
       this.setState({
         selected: cell,
         // console3: `\n ${JSON.stringify(cell)}`
@@ -219,6 +221,27 @@ class Board extends React.Component {
     let newPlayer2Pop = 0;
     this.state.cells.forEach((row) => {
       row.forEach((cell) => {
+        if (cell.isNuked) {
+          const newPop = Math.floor(cell.population * .75);
+          let isNuked = true;
+          if (Math.random() > .7) {
+            isNuked = false;
+          }
+          this.decorate(cell, {
+            population: newPop,
+            isNuked,
+          });
+        }
+
+        if (cell.isNuked && this.state.cells[cell.row][cell.col + 1]) {
+          if (Math.random() > .7) {
+            this.decorate(this.state.cells[cell.row][cell.col + 1], {
+              isNuked: true,
+            });
+          }
+        }
+
+
         if (cell.longitude < 0) {
           newPlayer1Pop += cell.population;
         } else {
@@ -244,21 +267,23 @@ class Board extends React.Component {
       this.setState({
         player1StartingPop: newPlayer1Pop,
         player2StartingPop: newPlayer2Pop,
+        player1CasualtyPercentage,
+        player2CasualtyPercentage,
       });
     } else {
       this.setState({
         player1Pop: newPlayer1Pop,
         player2Pop: newPlayer2Pop,
+        player1CasualtyPercentage,
+        player2CasualtyPercentage,
       });
     }
   }
 
   next() {
-    this.gameLoop();
-
+    let readout = '';
     const lastTurn = this.state.turn;
     const thisTurn = lastTurn + 1;
-    let readout = '';
     let currentPlayer;
     let currentPlayerName;
     if (thisTurn % 2 === 0) {
@@ -268,7 +293,14 @@ class Board extends React.Component {
       currentPlayerName = 'Communistico';
       currentPlayer = 2;
     }
-    readout = `Turn ${thisTurn}. It is ${currentPlayerName}'s turn to launch ${Math.ceil(this.state[`player${currentPlayer}Pop`] / 50000000)} ICBM(s)...`;
+    if (this.state.player1CasualtyPercentage > 75) {
+      readout = `Communistico wins by inflicting 75% on the Capitalistica`;
+    } else if (this.state.player2CasualtyPercentage > 75) {
+      readout = `Communistico wins by inflicting 75% on the Capitalistica`;
+    } else {
+      this.gameLoop();
+      readout = `Turn ${thisTurn}. It is ${currentPlayerName}'s turn to launch ${1} ICBM(s)...`;
+    }
 
     this.setState({
       turn: thisTurn,
