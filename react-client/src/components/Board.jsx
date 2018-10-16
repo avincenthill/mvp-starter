@@ -37,22 +37,31 @@ class Board extends React.Component {
         const rand = helpers.normalize(Math.random(), 1, 100);
         const longitude = helpers.normalize(j - this.state.numCols / 2, this.state.numCols / 2, 100);
         const latitude = helpers.normalize(i - this.state.numRows / 2, this.state.numRows / 2, 100);
+        const absLongitude = Math.abs(longitude);
+        const absLatitude = Math.abs(latitude);
+        const isLand = helpers.normalize(absLongitude + absLatitude / 5 + rand / 3, 133, 100) > 50;
         let owner = 0;
         if (longitude < 0) {
           owner = 1;
         } else {
           owner = 2;
         }
+        let population = 0;
+        if (isLand) {
+          population = 100;
+        }
         const newCell = {
           row: i,
           col: j,
           key: `${i},${j}`,
-          population: 0,
-          isLand: false,
-          isWater: false,
+          population,
+          isLand,
+          isWater: !isLand,
           isNuked: false,
           owner,
           rand,
+          absLongitude,
+          absLatitude,
           longitude,
           latitude,
         }
@@ -60,54 +69,75 @@ class Board extends React.Component {
       }
       cells.push(newRow);
     }
+
+    cells.forEach((row) => {
+      row.forEach((cell) => {
+        if (cell.rand > 70) {
+          cell.population += 2500;
+        }
+        if (cell.rand > 75) {
+          cell.population += 5000;
+        }
+        if (cell.rand > 90) {
+          cell.population += 10000;
+        }
+        if (cell.rand > 95) {
+          cell.population += 25000;
+        }
+        if (cell.rand > 98) {
+          if (cells[cell.row + 1] && cells[cell.row + 1][cell.col]) {
+            cells[cell.row + 1][cell.col].population += 2000000;
+          }
+          if (cells[cell.row - 1] && cells[cell.row - 1][cell.col]) {
+            cells[cell.row - 1][cell.col].population += 2000000;
+          }
+          if (cells[cell.row][cell.col + 1]) {
+            cells[cell.row][cell.col + 1].population += 2000000;
+          }
+          if (cells[cell.row][cell.col - 1]) {
+            cells[cell.row][cell.col - 1].population += 2000000;
+          }
+          cell.population += 4000000;
+        }
+      })
+    })
+
     return cells;
   }
 
   styleCells(cells) {
     cells.forEach((row) => {
       row.forEach((cell) => {
-        const long = Math.abs(cell.longitude);
-        const lat = Math.abs(cell.latitude);
-        cell.isLand = helpers.normalize(long + lat / 5 + cell.rand / 3, 133, 100) > 50;
-        let colorString = 'rgba(';
+        let colorString;
         if (cell.isLand) {
           if (cell.owner === 1) {
-            colorString += '0,0,255,'
+            colorString = 'rgba(0,0,255,'
           }
           if (cell.owner === 2) {
-            colorString += '255,0,0,'
+            colorString = 'rgba(255,0,0,'
           }
-          if (cell.rand <= 70) {
-            cell.population = 100;
-            colorString += '1)'
+
+          let opacity = '1)'
+          if (cell.population > 50000) {
+            opacity = '.8)'
           }
-          if (cell.rand > 70 && long > 50) {
-            cell.population = 50000
-            colorString += '.6)'
+          if (cell.population > 100000) {
+            opacity = '.7)'
           }
-          if (cell.rand > 70 && long <= 50) {
-            cell.population = 0
-            colorString += '1)'
+          if (cell.population > 500000) {
+            opacity = '.6)'
           }
-          if (cell.rand > 75 && long > 50) {
-            cell.population = 100000
-            colorString += '.2)'
+          if (cell.population > 1000000) {
+            opacity = '.5)'
           }
-          if (cell.rand > 90 && long > 50) {
-            cell.population = 500000
-            colorString += '.1)'
-          }
-          if (cell.rand > 95 && long > 50) {
-            cell.population = 1000000
-            colorString += '.05)'
-          }
-          if (cell.rand > 98 && long > 50) {
-            cell.population = 5000000
+          colorString += opacity;
+
+          if (cell.population > 3000000) {
             colorString = 'rgba(0,0,0)'
           }
-        } else {
-          cell.isWater = true;
-          colorString += '30,144,255,1)'
+        }
+        if (cell.isWater) {
+          colorString = 'rgba(30,144,255,1)'
         }
         cell.style = { fill: `${colorString}` };
       })
@@ -163,16 +193,16 @@ class Board extends React.Component {
         isNuked: true,
         style: { fill: `rgba(${232},${191},${40},1)` },
       });
-      if (this.state.cells[cell.row + 1] && this.state.cells[cell.row + 1][cell.col] && Math.random() > 1 / spread) {
+      if (this.state.cells[cell.row + 1] && this.state.cells[cell.row + 1][cell.col] && Math.random() + .1 > 1 / spread) {
         this.nuke(this.state.cells[cell.row + 1][cell.col], spread - 1);
       }
-      if (this.state.cells[cell.row - 1] && this.state.cells[cell.row - 1][cell.col] && Math.random() > 1 / spread) {
+      if (this.state.cells[cell.row - 1] && this.state.cells[cell.row - 1][cell.col] && Math.random() + .1 > 1 / spread) {
         this.nuke(this.state.cells[cell.row - 1][cell.col], spread - 1);
       }
-      if (this.state.cells[cell.row][cell.col + 1] && Math.random() > 1 / spread) {
+      if (this.state.cells[cell.row][cell.col + 1] && Math.random() + .1 > 1 / spread) {
         this.nuke(this.state.cells[cell.row][cell.col + 1], spread - 1);
       }
-      if (this.state.cells[cell.row][cell.col - 1] && Math.random() > 1 / spread) {
+      if (this.state.cells[cell.row][cell.col - 1] && Math.random() + .1 > 1 / spread) {
         this.nuke(this.state.cells[cell.row][cell.col - 1], spread - 1);
       }
     }
