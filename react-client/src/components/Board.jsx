@@ -25,6 +25,7 @@ class Board extends React.Component {
       player2Pop: 1,
       player1StartingPop: 1,
       player2StartingPop: 1,
+      isOver: false,
     };
     this.select.bind(this);
   }
@@ -99,6 +100,9 @@ class Board extends React.Component {
           }
           cell.population += 4000000;
         }
+        if (cell.isWater) {
+          cell.population = 0;
+        }
       })
     })
 
@@ -124,10 +128,10 @@ class Board extends React.Component {
           if (cell.population > 100000) {
             opacity = '.7)'
           }
-          if (cell.population > 500000) {
+          if (cell.population > 100000) {
             opacity = '.6)'
           }
-          if (cell.population > 1000000) {
+          if (cell.population > 500000) {
             opacity = '.5)'
           }
           colorString += opacity;
@@ -138,6 +142,9 @@ class Board extends React.Component {
         }
         if (cell.isWater) {
           colorString = 'rgba(30,144,255,1)'
+        }
+        if (cell.isNuked) {
+          colorString = 'rgba(255,255,0,1)'
         }
         cell.style = { fill: `${colorString}` };
       })
@@ -191,7 +198,6 @@ class Board extends React.Component {
       this.decorate(cell, {
         population: newPop,
         isNuked: true,
-        style: { fill: `rgba(${232},${191},${40},1)` },
       });
       if (this.state.cells[cell.row + 1] && this.state.cells[cell.row + 1][cell.col] && Math.random() + .1 > 1 / spread) {
         this.nuke(this.state.cells[cell.row + 1][cell.col], spread - 1);
@@ -234,7 +240,7 @@ class Board extends React.Component {
     this.setState({
       console2: `Capitalistica has a population of ${numeral(newPlayer1Pop).format('0,0')} (${player1CasualtyPercentage}% casualties)\nCommunistico has a population of ${numeral(newPlayer2Pop).format('0,0')} (${player2CasualtyPercentage}% casualties)`
     });
-    if (this.state.turn === 1) {
+    if (this.state.turn === 0) {
       this.setState({
         player1StartingPop: newPlayer1Pop,
         player2StartingPop: newPlayer2Pop,
@@ -243,17 +249,16 @@ class Board extends React.Component {
       this.setState({
         player1Pop: newPlayer1Pop,
         player2Pop: newPlayer2Pop,
-
       });
     }
   }
 
   next() {
     this.gameLoop();
+
     const lastTurn = this.state.turn;
     const thisTurn = lastTurn + 1;
     let readout = '';
-
     let currentPlayer;
     let currentPlayerName;
     if (thisTurn % 2 === 0) {
@@ -263,7 +268,7 @@ class Board extends React.Component {
       currentPlayerName = 'Communistico';
       currentPlayer = 2;
     }
-    readout = `Turn ${thisTurn}. It is ${currentPlayerName}'s turn to fire an ICBM...`;
+    readout = `Turn ${thisTurn}. It is ${currentPlayerName}'s turn to launch ${Math.ceil(this.state[`player${currentPlayer}Pop`] / 50000000)} ICBM(s)...`;
 
     this.setState({
       turn: thisTurn,
@@ -272,7 +277,7 @@ class Board extends React.Component {
       currentPlayerName,
     });
 
-    // this.styleCells(this.state.cells);
+    this.styleCells(this.state.cells);
   }
 
   render() {
